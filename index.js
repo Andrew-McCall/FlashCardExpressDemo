@@ -13,6 +13,10 @@ server.use((req, res, next) => {
     next();
 })
 
+// New Json Parsing Middleware.
+// It literally uses body-parser, just packaged with express now
+server.use(express.json())
+
 // Routes
 server.use("/set", require("./routes/setCRUD.js"))
 server.use("/card", require("./routes/cardCRUD.js"))
