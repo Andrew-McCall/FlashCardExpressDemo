@@ -19,40 +19,49 @@ router.get("/", (req, res) => {
 
 /// .populate finds all the cards via their id.
 /// "card_ids" is a one-to-many relationship with the card collection
+/// ExampleSet = {set_name:"One", card_ids[1,2]}
+/// will be populated to be
+/// ExampleSet = {set_name:"One", card_ids[{_id:1, front_text:"front", back_text:"back"},{_id:2, front_text:"back", back_text:"front"}]}
 
 router.get("/getAll", (req, res, error) => {
+    // Get all sets. Populate the cards in them
     setModel.find({}).populate("card_ids").then( sets => {
+        // Then Respond
         res.status(200).json(sets)
     }).catch(error)
  })
 
 router.get("/getOne/:id", (req, res, error) => {
-    setModel.findById(req.params.id).populate("card_ids").then( set => {
-        res.status(200).json(set)
+    // Find the set in the url, then respond
+    setModel.findById(req.params.id).then( set => {
+        // Populate the cards inside the set then respond
+        set.populate("card_ids").then( populatedSet => {
+            res.status(200).json(populatedSet)
+        })
     }).catch(error)
  })
 
 router.post("/create", (req, res, error) => {
-    // Create set from body
+    // Create set from using the request body, then respond
     setModel.create(req.body).then( set => {
         res.status(200).json(set)
     }).catch(error)
  })
 
 router.patch("/update/:id", (req,res,error) => {
-    // Find Set By ID
+    // Find Set By ID in url
     setModel.findById(req.params.id).then( set => {
-        // If set_name is in the body, update
+        // If set_name is in the request body, then update the set
         if (set.body.set_name){
             set.set_name = req.body.set_name
         }
 
-        // If card_ids is in the body, update
+        // If card_ids is in the request body, then update the set
         if (req.body.card_ids){
             set.card_ids = req.body.card_ids
         }
 
-        // Save then respond
+        // Save, populate the cards in the set, then respond
         set.save().populate("card_ids").then( setPopulated => {
             res.status(200).json(setPopulated)
         })
@@ -60,7 +69,7 @@ router.patch("/update/:id", (req,res,error) => {
 })
 
 router.post("/delete/:id", (req, res, error) => {
-    // Find and delete set
+    // Find and delete set in the url
     setModel.findByIdAndDelete(req.params.id).then( set => {
         // Respond
         res.status(200).json(set)
@@ -79,10 +88,10 @@ router.post("/set/addCard/:set_id/:card_id", (req, res, error) => {
                 throw Error("Set Already has that card!")
             }
 
-            // Add to set
+            // Add the card to set
             set.card_ids.push(card)
 
-            // Save set and respond
+            // Save set, populate the cards, and then respond
             set.save().populate("card_ids").then( populatedSet => {
                 res.status(200).json(populatedSet)
             })
@@ -100,7 +109,7 @@ router.post("/set/addNewCard/:id", (req, res, error) => {
             // Add new card to set
             set.card_ids.push(newCard)
 
-            // Save and Respond
+            // Save, populate the cards, and then respond
             set.save().populate("card_ids").then( populatedSet => {
                 res.status(200).json(populatedSet)
             })
