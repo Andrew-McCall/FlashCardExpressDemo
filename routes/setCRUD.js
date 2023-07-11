@@ -70,7 +70,7 @@ router.patch("/update/:id", (req,res,error) => {
     }).catch(error)
 })
 
-router.post("/delete/:id", (req, res, error) => {
+router.delete("/delete/:id", (req, res, error) => {
     // Find and delete set in the url
     setModel.findByIdAndDelete(req.params.id).then( set => {
         // Respond

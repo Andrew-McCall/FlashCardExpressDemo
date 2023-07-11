@@ -54,7 +54,7 @@ router.patch("/update/:id", (req,res,error) => {
     }).catch(error)
 })
 
-router.post("/delete/:id", (req, res, error) => {
+router.delete("/delete/:id", (req, res, error) => {
     // Find and delete the card in the url, then respond
     cardModel.findByIdAndDelete(req.params.id).then( card => {
         res.status(200).json(card)
