@@ -34,10 +34,15 @@ router.get("/getAll", (req, res, error) => {
 router.get("/getOne/:id", (req, res, error) => {
     // Find the set in the url, then respond
     setModel.findById(req.params.id).then( set => {
-        // Populate the cards inside the set then respond
-        set.populate("card_ids").then( populatedSet => {
-            res.status(200).json(populatedSet)
-        })
+        if (set){
+            // Populate the cards inside the set then respond
+            set.populate("card_ids").then( populatedSet => {
+                res.status(200).json(populatedSet)
+            })
+        }else{
+            throw Error("Set does not exist!")
+        }
+
     }).catch(error)
  })
 
@@ -51,22 +56,26 @@ router.post("/create", (req, res, error) => {
 router.patch("/update/:id", (req,res,error) => {
     // Find Set By ID in url
     setModel.findById(req.params.id).then( set => {
-        // If set_name is in the request body, then update the set
-        if (req.body.set_name){
-            set.set_name = req.body.set_name
-        }
+        if (set){
+            // If set_name is in the request body, then update the set
+            if (req.body.set_name){
+                set.set_name = req.body.set_name
+            }
 
-        // If card_ids is in the request body, then update the set
-        if (req.body.card_ids){
-            set.card_ids = req.body.card_ids
-        }
+            // If card_ids is in the request body, then update the set
+            if (req.body.card_ids){
+                set.card_ids = req.body.card_ids
+            }
 
-        // Save, populate the cards in the set, then respond
-        set.save().then( set => {
-            set.populate("card_ids").then( populatedSet => {
-                res.status(200).json(populatedSet)
+            // Save, populate the cards in the set, then respond
+            set.save().then( set => {
+                set.populate("card_ids").then( populatedSet => {
+                    res.status(200).json(populatedSet)
+                })
             })
-        })
+        }else{
+            throw Error("Set does not exist!")
+        }
     }).catch(error)
 })
 
@@ -74,52 +83,64 @@ router.delete("/delete/:id", (req, res, error) => {
     // Find and delete set in the url
     setModel.findByIdAndDelete(req.params.id).then( set => {
         // Respond
-        res.status(200).json(set)
+        if (set){
+            res.status(200).json(set)
+        }else{
+            throw Error("Set does not exist!")
+        }
     }).catch(error)
 })
 
 router.post("/addCard/:set_id/:card_id", (req, res, error) => {
     // Find set
     setModel.findById(req.params.set_id).then( set => {
+        if (set){
+            // Find card (to verify it exists)
+            cardModel.findById(req.params.card_id).then( card => {
+                if (card){
+                    // Check if it's already in set
+                    if (set.card_ids.indexOf(card._id) > -1){
+                        throw Error("Set Already has that card!")
+                    }
 
-        // Find card (to verify it exists)
-        cardModel.findById(req.params.card_id).then( card => {
-            
-            // Check if it's already in set
-            if (set.card_ids.indexOf(card._id) > -1){
-                throw Error("Set Already has that card!")
-            }
+                    // Add the card to set
+                    set.card_ids.push(card)
 
-            // Add the card to set
-            set.card_ids.push(card)
-
-            // Save set, populate the cards, and then respond
-            set.save().then( set => {
-                set.populate("card_ids").then( populatedSet => {
-                    res.status(200).json(populatedSet)
-                })
+                    // Save set, populate the cards, and then respond
+                    set.save().then( set => {
+                        set.populate("card_ids").then( populatedSet => {
+                            res.status(200).json(populatedSet)
+                        })
+                    })
+                }else{
+                    throw Error("Card does not exist!")
+                } 
             })
-
-        })
-
+        }else{
+            throw Error("Set does not exist!")
+        } 
     }).catch(error)
 })
 
 router.post("/addNewCard/:id", (req, res, error) => {
+    // Find set by url
+    setModel.findById(req.params.id).then(set => {
+        if (set){
+            // Create new card
+            cardModel.create(req.body).then( newCard => {
+                // Add new card to set
+                set.card_ids.push(newCard)
 
-    // Create new card
-    cardModel.create(req.body).then( newCard => {
-        setModel.findById(req.params.id).then(set => {
-            // Add new card to set
-            set.card_ids.push(newCard)
-
-            // Save, populate the cards, and then respond
-            set.save().then( set => {
-                set.populate("card_ids").then( populatedSet => {
-                    res.status(200).json(populatedSet)
+                // Save, populate the cards, and then respond
+                set.save().then( set => {
+                    set.populate("card_ids").then( populatedSet => {
+                        res.status(200).json(populatedSet)
+                    })
                 })
             })
-        })
+        }else{
+            throw Error("Set does not exist!")
+        } 
     }).catch(error)
 
 })
