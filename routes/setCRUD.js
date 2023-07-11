@@ -52,7 +52,7 @@ router.patch("/update/:id", (req,res,error) => {
     // Find Set By ID in url
     setModel.findById(req.params.id).then( set => {
         // If set_name is in the request body, then update the set
-        if (set.body.set_name){
+        if (req.body.set_name){
             set.set_name = req.body.set_name
         }
 
@@ -110,8 +110,10 @@ router.post("/addNewCard/:id", (req, res, error) => {
             set.card_ids.push(newCard)
 
             // Save, populate the cards, and then respond
-            set.save().populate("card_ids").then( populatedSet => {
-                res.status(200).json(populatedSet)
+            set.save().then( set => {
+                set.populate("card_ids").then( populatedSet => {
+                    res.status(200).json(populatedSet)
+                })
             })
         })
     }).catch(error)
