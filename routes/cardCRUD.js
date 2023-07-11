@@ -23,7 +23,11 @@ router.get("/getAll", (req, res, error) => {
 router.get("/getOne/:id", (req, res, error) => {
     // Find the card in the url, then respond
     cardModel.findById(req.params.id).then( card => {
-        res.status(200).json(card)
+        if (card){
+            res.status(200).json(card)
+        }else{
+            throw Error("Card does not exist!")
+        }
     }).catch(error)
  })
 
@@ -37,27 +41,35 @@ router.post("/create", (req, res, error) => {
 router.patch("/update/:id", (req,res,error) => {
     // Find the card in url
     cardModel.findById(req.params.id).then( card => {
-        // If the reqest body has front_text, update the card
-        if (req.body.front_text){
-            card.front_text = req.body.front_text
-        }
+        if (card){
+            // If the reqest body has front_text, update the card
+            if (req.body.front_text){
+                card.front_text = req.body.front_text
+            }
 
-        // If the reqest body has back_text, update the card
-        if (req.body.back_text){
-            card.back_text = req.body.back_text
-        }
+            // If the reqest body has back_text, update the card
+            if (req.body.back_text){
+                card.back_text = req.body.back_text
+            }
 
-        // Save the card, then respond
-        card.save().then(() => {
-            res.status(200).json(card)
-        })
+            // Save the card, then respond
+            card.save().then(() => {
+                res.status(200).json(card)
+            })
+        }else{
+            throw Error("Card does not exist!")
+        }
     }).catch(error)
 })
 
 router.delete("/delete/:id", (req, res, error) => {
     // Find and delete the card in the url, then respond
     cardModel.findByIdAndDelete(req.params.id).then( card => {
-        res.status(200).json(card)
+        if (card){
+            res.status(200).json(card)
+        }else{
+            throw Error("Card does not exist!")
+        }
     }).catch(error)
 })
 
