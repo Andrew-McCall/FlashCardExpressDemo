@@ -76,7 +76,7 @@ router.post("/delete/:id", (req, res, error) => {
     }).catch(error)
 })
 
-router.post("/set/addCard/:set_id/:card_id", (req, res, error) => {
+router.post("/addCard/:set_id/:card_id", (req, res, error) => {
     // Find set
     setModel.findById(req.params.set_id).then( set => {
 
@@ -101,7 +101,7 @@ router.post("/set/addCard/:set_id/:card_id", (req, res, error) => {
     }).catch(error)
 })
 
-router.post("/set/addNewCard/:id", (req, res, error) => {
+router.post("/addNewCard/:id", (req, res, error) => {
 
     // Create new card
     cardModel.create(req.body).then( newCard => {
