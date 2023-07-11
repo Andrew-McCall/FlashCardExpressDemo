@@ -62,8 +62,10 @@ router.patch("/update/:id", (req,res,error) => {
         }
 
         // Save, populate the cards in the set, then respond
-        set.populate("card_ids").save().then( setPopulated => {
-            res.status(200).json(setPopulated)
+        set.save().then( set => {
+            set.populate("card_ids").then( populatedSet => {
+                res.status(200).json(populatedSet)
+            })
         })
     }).catch(error)
 })
@@ -92,8 +94,10 @@ router.post("/addCard/:set_id/:card_id", (req, res, error) => {
             set.card_ids.push(card)
 
             // Save set, populate the cards, and then respond
-            set.populate("card_ids").save().then( populatedSet => {
-                res.status(200).json(populatedSet)
+            set.save().then( set => {
+                set.populate("card_ids").then( populatedSet => {
+                    res.status(200).json(populatedSet)
+                })
             })
 
         })
