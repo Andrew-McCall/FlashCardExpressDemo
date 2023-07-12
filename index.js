@@ -21,6 +21,13 @@ server.use(express.json())
 server.use("/set", require("./routes/setCRUD.js"))
 server.use("/card", require("./routes/cardCRUD.js"))
 
+// Error Middleware
+server.use((error, req, res, next) => {
+    console.log(error)
+    res.type("'application/json'")
+    res.status(500).json({error: error.message})
+})
+
 // Connect to db, then Start accepting requests
 mongoose.connect(config.MONGO_URL).then(() => {
     console.log("Connected to the MongoDB Server!")
